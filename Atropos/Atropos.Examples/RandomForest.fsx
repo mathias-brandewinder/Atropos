@@ -4,6 +4,7 @@
 #r @"alglibnet2/lib/alglibnet2.dll"
 
 open Atropos.Core
+open Atropos.Utilities
 open Atropos.RandomForest
 
 #r @"FSharp.Data/lib/net40/FSharp.Data.dll"
@@ -19,11 +20,13 @@ let sample =
 
 let ``passenger age`` : FeatureLearner<Passenger,float> =
     fun sample ->
-        fun pass -> pass.Age
+        let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Age))
+        fun pass -> pass.Age |> avg
 
 let ``passenger class`` : FeatureLearner<Passenger,float> =
     fun sample ->
-        fun pass -> pass.Pclass |> float
+        let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Pclass |> float))
+        fun pass -> pass.Pclass |> float |> avg
 
 let ``family travel`` : FeatureLearner<Passenger,float> =
     fun sample ->
@@ -40,21 +43,19 @@ let featurize =
     |> learnFeatures sample
     |> featurizer
 
-let isNumber = System.Double.IsNaN >> not
-
 // TODO: figure out how to handle missing values
-let filtered = 
-    sample
-    |> Seq.filter (fun (o,l) -> 
-        o
-        |> featurize
-        |> Seq.forall isNumber)
-    |> Seq.toList
+// 2 possible strategies:
+// 1) value replacement
+// 2) filter out incomplete observations
+
+// perhaps a reasonable strategy is
+// "define feature behavior if you want, but
+// filter out unusable rows anyways"
 
 let rfPredictor = 
-    RandomForest.learn model (filtered |> Seq.take 500)
+    RandomForest.learn model (sample |> Seq.take 500)
 
-filtered
+sample
 |> Seq.skip 500
 |> Seq.map (fun (o,l) -> rfPredictor o, l)
 |> Seq.toList
