@@ -4,6 +4,8 @@ module Utilities =
 
     open System
 
+    // For float values, we will assume that
+    // NaN or Infinity are not tolerable values.
     let missing = Double.IsNaN
     let infinity = Double.IsInfinity
 
@@ -15,9 +17,14 @@ module Utilities =
     let naReplace def x = 
         if number x then x else def
 
-    let numbers xs = xs |> Seq.filter number
+    // TODO improve naming; goal is to detect
+    // if a vector contains only valid numbers.
+    let numbers xs = xs |> Seq.forall number
 
-    let average xs = xs |> numbers |> Seq.average
+    let average xs = 
+        xs 
+        |> Seq.filter number 
+        |> Seq.average
 
-    let avgReplace xs =
-        (average xs) |> naReplace
+    let avgReplace (xs:float seq) =
+        naReplace (average xs)

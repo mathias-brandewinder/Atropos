@@ -13,50 +13,80 @@ open FSharp.Data
 type Sample = CsvProvider<"titanic.csv">
 type Passenger = Sample.Row
 
-let sample = 
-    Sample.GetSample().Rows
-    |> Seq.map (fun row ->
-        row, row.Fare |> float)
+// regression model: the goal is to predict
+// how much a passenger paid for his/her ticket.
+let ``regression example`` () = 
 
-let ``passenger age`` : FeatureLearner<Passenger,float> =
-    fun sample ->
-        let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Age))
-        fun pass -> pass.Age |> avg
+    let fareSample = 
+        Sample.GetSample().Rows
+        |> Seq.map (fun row ->
+            row, row.Fare |> float)
 
-let ``passenger class`` : FeatureLearner<Passenger,float> =
-    fun sample ->
-        let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Pclass |> float))
-        fun pass -> pass.Pclass |> float |> avg
+    let ``passenger age`` : FeatureLearner<Passenger,float> =
+        fun sample ->
+            let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Age))
+            fun pass -> pass.Age |> avg
 
-let ``family travel`` : FeatureLearner<Passenger,float> =
-    fun sample ->
-        fun pass -> if pass.Parch > 0 then 1. else 0.
+    let ``passenger class`` : FeatureLearner<Passenger,float> =
+        fun sample ->
+            let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Pclass |> float))
+            fun pass -> pass.Pclass |> float |> avg
 
-let model = [
-    ``passenger age``
-    ``passenger class``
-    ``family travel``
-    ]
+    let ``family travel`` : FeatureLearner<Passenger,float> =
+        fun sample ->
+            fun pass -> if pass.Parch > 0 then 1. else 0.
 
-let featurize =
-    model
-    |> learnFeatures sample
-    |> featurizer
+    let model = [
+        ``passenger age``
+        ``passenger class``
+        ``family travel``
+        ]
 
-// TODO: figure out how to handle missing values
-// 2 possible strategies:
-// 1) value replacement
-// 2) filter out incomplete observations
+    let rfRegression = 
+        RandomForest.regression model fareSample
 
-// perhaps a reasonable strategy is
-// "define feature behavior if you want, but
-// filter out unusable rows anyways"
+    fareSample
+    |> Seq.map (fun (o,l) -> rfRegression o, l)
+    |> Seq.toList
+    |> Seq.averageBy (fun (a,b) -> abs (a - b))
 
-let rfPredictor = 
-    RandomForest.learn model (sample |> Seq.take 500)
+// classification example: predicting
+// whether a passenger survives.
+let ``classification model`` () = 
 
-sample
-|> Seq.skip 500
-|> Seq.map (fun (o,l) -> rfPredictor o, l)
-|> Seq.toList
-|> Seq.averageBy (fun (a,b) -> abs (a - b))
+    let survivalSample = 
+        Sample.GetSample().Rows
+        |> Seq.map (fun row ->
+            row, row.Survived)
+
+    let ``passenger age`` : FeatureLearner<Passenger,bool> =
+        fun sample ->
+            let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Age))
+            fun pass -> pass.Age |> avg
+
+    // this is terrible - should expand into 3 columns
+    let ``passenger class`` : FeatureLearner<Passenger,bool> =
+        fun sample ->
+            let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Pclass |> float))
+            fun pass -> if pass.Pclass = 3 then 1. else 0.
+
+    let gender : FeatureLearner<Passenger,bool> =
+        fun sample ->
+            fun pass -> if pass.Sex = "male" then 1. else 0.
+
+    let model = [
+        ``passenger age``
+        ``passenger class``
+        gender
+        ]
+
+    let rfClassification = 
+        survivalSample
+        |> RandomForest.classifier model 
+
+    survivalSample
+    |> Seq.map (fun (o,l) -> 
+        printfn "%b,%b" (rfClassification o) l
+        rfClassification o, l)
+    |> Seq.toList
+    |> Seq.averageBy (fun (a,b) -> if a = b then 1. else 0.)
