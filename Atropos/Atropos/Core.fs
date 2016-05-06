@@ -11,12 +11,16 @@ module Core =
 
     type Example<'Obs,'Lbl> = 'Obs * 'Lbl
 
+    type Variable =
+        | Discrete of string[] * string
+        | Continuous of float
+    
     // TODO: refine with additional feature information,
     // for instance discrete vs. continuous, or interval
     // (bounded/unbounded).
     // A Feature extracts a measure from
     // a single Observation
-    type Feature<'Obs> = 'Obs -> float
+    type Feature<'Obs> = 'Obs -> Variable
 
     // TODO: consider a broader notion of 'context',
     // i.e. information available besides sample.
@@ -47,4 +51,11 @@ module Core =
             fun (obs:'Obs) ->
                 features
                 |> Seq.map (fun f -> f obs)
+                |> Seq.map (fun v ->
+                    match v with
+                    | Continuous(x) -> [| x |]
+                    | Discrete(xs,x) -> 
+                        Array.init (xs.Length) 
+                            (fun i -> if xs.[i] = x then 1. else 0.))
                 |> Seq.toArray
+                |> Array.collect id

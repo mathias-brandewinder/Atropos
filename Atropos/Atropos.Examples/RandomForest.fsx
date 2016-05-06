@@ -25,16 +25,16 @@ let ``regression example`` () =
     let ``passenger age`` : FeatureLearner<Passenger,float> =
         fun sample ->
             let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Age))
-            fun pass -> pass.Age |> avg
+            fun pass -> pass.Age |> avg |> Continuous
 
     let ``passenger class`` : FeatureLearner<Passenger,float> =
         fun sample ->
             let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Pclass |> float))
-            fun pass -> pass.Pclass |> float |> avg
+            fun pass -> pass.Pclass |> float |> avg |> Continuous
 
     let ``family travel`` : FeatureLearner<Passenger,float> =
         fun sample ->
-            fun pass -> if pass.Parch > 0 then 1. else 0.
+            fun pass -> (if pass.Parch > 0 then 1. else 0.) |> Continuous
 
     let model = [
         ``passenger age``
@@ -59,20 +59,21 @@ let ``classification model`` () =
         |> Seq.map (fun row ->
             row, row.Survived)
 
+    // this should be simplified
     let ``passenger age`` : FeatureLearner<Passenger,bool> =
         fun sample ->
             let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Age))
-            fun pass -> pass.Age |> avg
+            fun pass -> pass.Age |> avg |> Continuous
 
     // this is terrible - should expand into 3 columns
     let ``passenger class`` : FeatureLearner<Passenger,bool> =
         fun sample ->
             let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Pclass |> float))
-            fun pass -> if pass.Pclass = 3 then 1. else 0.
+            fun pass -> Discrete ([|"1";"2";"3"|], pass.Pclass |> string) 
 
     let gender : FeatureLearner<Passenger,bool> =
         fun sample ->
-            fun pass -> if pass.Sex = "male" then 1. else 0.
+            fun pass -> Discrete ([|"male";"female"|], pass.Sex)
 
     let model = [
         ``passenger age``
