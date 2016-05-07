@@ -61,11 +61,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="alglibnet2">
-      <HintPath>..\..\packages\alglibnet2\lib\alglibnet2.dll</HintPath>
-      <Private>True</Private>
-      <Paket>True</Paket>
-    </Reference>
     <ProjectReference Include="..\Atropos\Atropos.fsproj">
       <Name>Atropos</Name>
       <Project>{addeff8d-e623-4f86-b8cb-27cd6749f619}</Project>
@@ -79,4 +74,11 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Reference Include="alglibnet2">
+      <HintPath>..\..\packages\alglibnet2\lib\alglibnet2.dll</HintPath>
+      <Private>True</Private>
+      <Paket>True</Paket>
+    </Reference>
+  </ItemGroup>
 </Project>

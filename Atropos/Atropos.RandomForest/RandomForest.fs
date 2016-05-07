@@ -39,6 +39,8 @@ module RandomForest =
                     |> array2D
 
                 let sampleSize = trainingData |> Array2D.length1
+                // TODO verify. Is this correct, now
+                // that discrete features get 'exploded'?
                 let featureCount = model |> Seq.length
 
                 let config = DefaultRFConfig

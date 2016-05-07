@@ -1,0 +1,75 @@
+﻿namespace Atropos.Regression
+
+(*
+TODO
+- handle different label options
+    - discrete: is it binary
+    - continuous: is it in [0;1]
+    - if continuous, should I normalize if I have bounds information?
+    - 'positive/negatives per case'
+    - how about multi-class, multi-label?
+*)
+
+[<RequireQualifiedAccess>]
+module Logistic = 
+
+    open Atropos.Utilities
+    open Atropos.Core
+    open Accord.Statistics.Models.Regression
+    open Accord.Statistics.Models.Regression.Fitting
+
+    type LogisticConfig = {
+        // maximum iterations during learning
+        MaxIterations : int
+        // if change % falls under that level
+        // during learning, exit.
+        MinDelta: float
+        }
+
+    let DefaultConfig = {
+        MaxIterations = 100 
+        MinDelta = 0.001
+        }
+
+    let regression : Learner<'Obs,float> =
+        fun model ->
+            fun sample ->
+
+                let featurize =
+                    model
+                    |> learnFeatures sample
+                    |> featurizer
+
+                let features, labels =
+                    sample
+                    |> Seq.map (fun (obs,lbl) ->
+                        let fs = featurize obs
+                        fs,lbl)
+                    // discard any row with missing data
+                    |> Seq.filter (fun (obs,lbl) -> numbers obs && number lbl)
+                    // can I have one-shot Array extraction?
+                    |> Seq.toArray
+                    |> Array.unzip
+
+                let featuresCount = features.[0].Length
+
+                let logisticReg = LogisticRegression(featuresCount)
+                let learner = LogisticGradientDescent(logisticReg)
+
+                let rec improve iteration =
+
+                    let delta = learner.Run(features,labels)
+                    
+                    // TODO: inject actual Config.
+                    if delta < DefaultConfig.MinDelta
+                    then ignore ()
+                    elif iteration > DefaultConfig.MaxIterations
+                    then ignore ()
+                    else improve (iteration + 1)
+                
+                improve 0
+                
+                let predictor = 
+                    featurize >> logisticReg.Compute
+
+                predictor
