@@ -8,3 +8,4 @@ TODO
 [ ] Reporting
 [ ] Real-time update on convergence etc...?
 [ ] Check categorical exploding: n cases -> n-1 columns? How about unknown values?
+[ ] Algorithms: use functions, or classes?

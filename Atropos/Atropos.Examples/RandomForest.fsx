@@ -68,7 +68,6 @@ let ``classification model`` () =
     // this is terrible - should expand into 3 columns
     let ``passenger class`` : FeatureLearner<Passenger,bool> =
         fun sample ->
-            let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Pclass |> float))
             fun pass -> Discrete ([|"1";"2";"3"|], pass.Pclass |> string) 
 
     let gender : FeatureLearner<Passenger,bool> =

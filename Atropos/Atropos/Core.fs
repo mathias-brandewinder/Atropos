@@ -11,10 +11,28 @@ module Core =
 
     type Example<'Obs,'Lbl> = 'Obs * 'Lbl
 
+    // Define two types of variables:
+    // Discrete: can take one of a few possible values,
+    // Continuous: can take any float value.
     type Variable =
         | Discrete of string[] * string
         | Continuous of float
     
+    // transform a categorical feature
+    // into columns marked 0 or 1.
+    // we create one column less than
+    // we have cases, because the last
+    // would be redundant.
+    // missing/unexpected values result
+    // in a NaN-filled array.
+    let explode (values:string[]) (value:string) =
+        if (values |> Array.contains value)
+        then
+            Array.init (values.Length - 1) 
+                (fun i -> if values.[i] = value then 1. else 0.)
+        else
+            Array.init (values.Length - 1) (fun _ -> nan)
+
     // TODO: refine with additional feature information,
     // for instance discrete vs. continuous, or interval
     // (bounded/unbounded).
@@ -54,8 +72,6 @@ module Core =
                 |> Seq.map (fun v ->
                     match v with
                     | Continuous(x) -> [| x |]
-                    | Discrete(xs,x) -> 
-                        Array.init (xs.Length) 
-                            (fun i -> if xs.[i] = x then 1. else 0.))
+                    | Discrete(xs,x) -> explode xs x
                 |> Seq.toArray
                 |> Array.collect id
