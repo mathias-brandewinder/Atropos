@@ -5,6 +5,9 @@
 
 open Atropos.Core
 open Atropos.Utilities
+open Atropos.Metrics
+// TODO: should this be Atropos.Alglib.RandomForest?
+// TODO: should this be a separate package?
 open Atropos.RandomForest
 
 #r @"FSharp.Data/lib/net40/FSharp.Data.dll"
@@ -29,8 +32,7 @@ let ``regression example`` () =
 
     let ``passenger class`` : FeatureLearner<Passenger,float> =
         fun sample ->
-            let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Pclass |> float))
-            fun pass -> pass.Pclass |> float |> avg |> Continuous
+            fun pass -> Discrete ([|"1";"2";"3"|], pass.Pclass |> string)
 
     let ``family travel`` : FeatureLearner<Passenger,float> =
         fun sample ->
@@ -47,8 +49,7 @@ let ``regression example`` () =
 
     fareSample
     |> Seq.map (fun (o,l) -> rfRegression o, l)
-    |> Seq.toList
-    |> Seq.averageBy (fun (a,b) -> abs (a - b))
+    |> RMSE
 
 // classification example: predicting
 // whether a passenger survives.
@@ -65,7 +66,6 @@ let ``classification model`` () =
             let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Age))
             fun pass -> pass.Age |> avg |> Continuous
 
-    // this is terrible - should expand into 3 columns
     let ``passenger class`` : FeatureLearner<Passenger,bool> =
         fun sample ->
             fun pass -> Discrete ([|"1";"2";"3"|], pass.Pclass |> string) 

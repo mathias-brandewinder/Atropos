@@ -4,6 +4,7 @@
 
 open Atropos.Core
 open Atropos.Utilities
+open Atropos.Metrics
 open Atropos.Regression
 
 #r @"FSharp.Data/lib/net40/FSharp.Data.dll"
@@ -46,4 +47,4 @@ let ``classification model`` () =
     survivalSample
     |> Seq.map (fun (o,l) -> 
         logRegression o, l)
-    |> Seq.averageBy (fun (a,b) -> if a = b then 1. else 0.)
+    |> RMSE

@@ -72,6 +72,6 @@ module Core =
                 |> Seq.map (fun v ->
                     match v with
                     | Continuous(x) -> [| x |]
-                    | Discrete(xs,x) -> explode xs x
+                    | Discrete(xs,x) -> explode xs x)
                 |> Seq.toArray
                 |> Array.collect id
