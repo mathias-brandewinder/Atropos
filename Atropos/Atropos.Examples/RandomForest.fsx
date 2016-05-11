@@ -53,7 +53,7 @@ let ``regression example`` () =
 
 // classification example: predicting
 // whether a passenger survives.
-let ``classification model`` () = 
+let ``classification example`` () = 
 
     let survivalSample = 
         Sample.GetSample().Rows
@@ -86,7 +86,5 @@ let ``classification model`` () =
 
     survivalSample
     |> Seq.map (fun (o,l) -> 
-        printfn "%b,%b" (rfClassification o) l
         rfClassification o, l)
-    |> Seq.toList
     |> Seq.averageBy (fun (a,b) -> if a = b then 1. else 0.)

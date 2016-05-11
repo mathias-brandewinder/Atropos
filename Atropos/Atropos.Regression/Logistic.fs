@@ -18,7 +18,7 @@ module Logistic =
     open Accord.Statistics.Models.Regression
     open Accord.Statistics.Models.Regression.Fitting
 
-    type LogisticConfig = {
+    type Config = {
         // maximum iterations during learning
         MaxIterations : int
         // if change % falls under that level
@@ -31,45 +31,46 @@ module Logistic =
         MinDelta = 0.001
         }
 
-    let regression : Learner<'Obs,float> =
-        fun model ->
-            fun sample ->
+    let regression : Config -> Learner<'Obs,float> =
 
-                let featurize =
-                    model
-                    |> learnFeatures sample
-                    |> featurizer
+        fun config ->
+            fun model ->
+                fun sample ->
 
-                let features, labels =
-                    sample
-                    |> Seq.map (fun (obs,lbl) ->
-                        let fs = featurize obs
-                        fs,lbl)
-                    // discard any row with missing data
-                    |> Seq.filter (fun (obs,lbl) -> numbers obs && number lbl)
-                    // can I have one-shot Array extraction?
-                    |> Seq.toArray
-                    |> Array.unzip
+                    let featurize =
+                        model
+                        |> learnFeatures sample
+                        |> featurizer
 
-                let featuresCount = features.[0].Length
+                    let features, labels =
+                        sample
+                        |> Seq.map (fun (obs,lbl) ->
+                            let fs = featurize obs
+                            fs,lbl)
+                        // discard any row with missing data
+                        |> Seq.filter (fun (obs,lbl) -> numbers obs && number lbl)
+                        // TODO: can I have one-shot Array extraction?
+                        |> Seq.toArray
+                        |> Array.unzip
 
-                let logisticReg = LogisticRegression(featuresCount)
-                let learner = LogisticGradientDescent(logisticReg)
+                    let featuresCount = features.[0].Length
 
-                let rec improve iteration =
+                    let logisticReg = LogisticRegression(featuresCount)
+                    let learner = LogisticGradientDescent(logisticReg)
 
-                    let delta = learner.Run(features,labels)
+                    let rec improve iteration =
+
+                        let delta = learner.Run(features,labels)
                     
-                    // TODO: inject actual Config.
-                    if delta < DefaultConfig.MinDelta
-                    then ignore ()
-                    elif iteration > DefaultConfig.MaxIterations
-                    then ignore ()
-                    else improve (iteration + 1)
+                        if delta < config.MinDelta
+                        then ignore ()
+                        elif iteration > config.MaxIterations
+                        then ignore ()
+                        else improve (iteration + 1)
                 
-                improve 0
+                    improve 0
                 
-                let predictor = 
-                    featurize >> logisticReg.Compute
+                    let predictor = 
+                        featurize >> logisticReg.Compute
 
-                predictor
+                    predictor

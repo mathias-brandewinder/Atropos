@@ -42,7 +42,7 @@ let ``classification model`` () =
 
     let logRegression = 
         survivalSample
-        |> Logistic.regression model 
+        |> Logistic.regression Logistic.DefaultConfig model 
 
     survivalSample
     |> Seq.map (fun (o,l) -> 
