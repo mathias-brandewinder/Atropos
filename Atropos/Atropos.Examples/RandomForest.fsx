@@ -6,8 +6,6 @@
 open Atropos.Core
 open Atropos.Utilities
 open Atropos.Metrics
-// TODO: should this be Atropos.Alglib.RandomForest?
-// TODO: should this be a separate package?
 open Atropos.RandomForest
 
 #r @"FSharp.Data/lib/net40/FSharp.Data.dll"
@@ -45,7 +43,8 @@ let ``regression example`` () =
         ]
 
     let rfRegression = 
-        RandomForest.regression model fareSample
+        fareSample
+        |> RandomForest.regression RandomForest.DefaultConfig model
 
     fareSample
     |> Seq.map (fun (o,l) -> rfRegression o, l)
@@ -60,7 +59,6 @@ let ``classification example`` () =
         |> Seq.map (fun row ->
             row, row.Survived)
 
-    // this should be simplified
     let ``passenger age`` : FeatureLearner<Passenger,bool> =
         fun sample ->
             let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Age))
@@ -82,9 +80,9 @@ let ``classification example`` () =
 
     let rfClassification = 
         survivalSample
-        |> RandomForest.classifier model 
+        |> RandomForest.classifier RandomForest.DefaultConfig model 
 
     survivalSample
     |> Seq.map (fun (o,l) -> 
         rfClassification o, l)
-    |> Seq.averageBy (fun (a,b) -> if a = b then 1. else 0.)
+    |> accuracy

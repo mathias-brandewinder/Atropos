@@ -1,4 +1,4 @@
-﻿namespace Atropos.RandomForest.AssemblyInfo
+﻿namespace Atropos.SVM.AssemblyInfo
 
 open System.Reflection
 open System.Runtime.CompilerServices
@@ -7,11 +7,11 @@ open System.Runtime.InteropServices
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[<assembly: AssemblyTitle("Atropos.RandomForest")>]
+[<assembly: AssemblyTitle("Atropos.SVM")>]
 [<assembly: AssemblyDescription("")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
-[<assembly: AssemblyProduct("Atropos.RandomForest")>]
+[<assembly: AssemblyProduct("Atropos.SVM")>]
 [<assembly: AssemblyCopyright("Copyright ©  2016")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]
@@ -22,7 +22,7 @@ open System.Runtime.InteropServices
 [<assembly: ComVisible(false)>]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[<assembly: Guid("95192a3e-229c-40b8-bde8-4e630ad65530")>]
+[<assembly: Guid("a76759a3-6a9a-4f2a-a9d2-8c6cd4b1cf21")>]
 
 // Version information for an assembly consists of the following four values:
 // 

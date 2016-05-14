@@ -25,6 +25,7 @@ module Core =
     // would be redundant.
     // missing/unexpected values result
     // in a NaN-filled array.
+    // TODO confirm that 1-less column is OK.
     let explode (values:string[]) (value:string) =
         if (values |> Array.contains value)
         then
@@ -32,10 +33,7 @@ module Core =
                 (fun i -> if values.[i] = value then 1. else 0.)
         else
             Array.init (values.Length - 1) (fun _ -> nan)
-
-    // TODO: refine with additional feature information,
-    // for instance discrete vs. continuous, or interval
-    // (bounded/unbounded).
+  
     // A Feature extracts a measure from
     // a single Observation
     type Feature<'Obs> = 'Obs -> Variable

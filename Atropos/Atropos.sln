@@ -11,6 +11,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Atropos.Examples", "Atropos
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Atropos.Regression", "Atropos.Regression\Atropos.Regression.fsproj", "{1D1739D0-F687-46A9-B4F7-801305182C08}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Atropos.SVM", "Atropos.SVM\Atropos.SVM.fsproj", "{A76759A3-6A9A-4F2A-A9D2-8C6CD4B1CF21}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{1D1739D0-F687-46A9-B4F7-801305182C08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D1739D0-F687-46A9-B4F7-801305182C08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D1739D0-F687-46A9-B4F7-801305182C08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A76759A3-6A9A-4F2A-A9D2-8C6CD4B1CF21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A76759A3-6A9A-4F2A-A9D2-8C6CD4B1CF21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A76759A3-6A9A-4F2A-A9D2-8C6CD4B1CF21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A76759A3-6A9A-4F2A-A9D2-8C6CD4B1CF21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

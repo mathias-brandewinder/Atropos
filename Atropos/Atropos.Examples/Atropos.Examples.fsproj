@@ -44,8 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="titanic.csv" />
+    <None Include="SampleDescription.fsx" />
     <None Include="RandomForest.fsx" />
     <None Include="LogisticRegression.fsx" />
+    <None Include="SVM.fsx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Atropos.RandomForest\Atropos.RandomForest.fsproj">
