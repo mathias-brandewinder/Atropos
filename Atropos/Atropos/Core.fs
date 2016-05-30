@@ -1,7 +1,6 @@
 ﻿namespace Atropos
 
 module Core =
-
     (*
     'Obs = generic Observation type
     'Lbl = generic Label type

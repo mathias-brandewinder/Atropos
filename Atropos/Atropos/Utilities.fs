@@ -3,6 +3,7 @@
 module Utilities =
 
     open System
+    open MathNet.Numerics.LinearAlgebra
 
     // For float values, we will assume that
     // NaN or Infinity are not tolerable values.
@@ -28,3 +29,11 @@ module Utilities =
 
     let avgReplace (xs:float seq) =
         naReplace (average xs)
+
+    //Helper Linear Algebra Functions
+    //For more functional coding style
+    let square (x:Vector<float>) = x * x 
+    let subtract (x:Vector<float>) (y:Vector<float>) = y - x
+    let divideBy (x:float) (y:float) = y / x
+    let divideVecBy (x:float) (y:Vector<float>) = y / x
+    let multiply (x:float) (y:Vector<float>) = y * x
