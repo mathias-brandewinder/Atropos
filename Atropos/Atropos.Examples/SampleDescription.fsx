@@ -1,7 +1,7 @@
 ﻿// Basic sample statistics
 
-#I @"../../packages/"
-#r @"FSharp.Data/lib/net40/FSharp.Data.dll"
+#I @"../packages/"
+#r @"../packages/FSharp.Data.2.3.0/lib/net40/FSharp.Data.dll"
 open FSharp.Data
 
 type Sample = CsvProvider<"titanic.csv">

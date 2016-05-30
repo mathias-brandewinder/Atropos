@@ -1,13 +1,13 @@
-﻿#I @"../../packages/"
-#r @"../Atropos/Atropos/bin/Debug/Atropos.dll"
-#r @"../Atropos/Atropos.SVM/bin/Debug/Atropos.SVM.dll"
+﻿#I @"../packages/"
+#r @"../Atropos/bin/Debug/Atropos.dll"
+#r @"../Atropos.SVM/bin/Debug/Atropos.SVM.dll"
 
 open Atropos.Core
 open Atropos.Utilities
 open Atropos.Metrics
 open Atropos.SVM
 
-#r @"FSharp.Data/lib/net40/FSharp.Data.dll"
+#r @"../packages/FSharp.Data.2.3.0/lib/net40/FSharp.Data.dll"
 open FSharp.Data
 
 type Sample = CsvProvider<"titanic.csv">
