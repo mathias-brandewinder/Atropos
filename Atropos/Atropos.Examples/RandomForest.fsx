@@ -1,14 +1,14 @@
-﻿#I @"../../packages/"
-#r @"../Atropos/Atropos/bin/Debug/Atropos.dll"
-#r @"../Atropos/Atropos.RandomForest/bin/Debug/Atropos.RandomForest.dll"
-#r @"alglibnet2/lib/alglibnet2.dll"
+﻿#I @"../packages/"
+#r @"../Atropos/bin/Debug/Atropos.dll"
+#r @"../Atropos.RandomForest/bin/Debug/Atropos.RandomForest.dll"
+#r @"../packages/alglibnet2.0.0.0/lib/alglibnet2.dll"
 
 open Atropos.Core
 open Atropos.Utilities
 open Atropos.Metrics
 open Atropos.RandomForest
 
-#r @"FSharp.Data/lib/net40/FSharp.Data.dll"
+#r @"../packages/FSharp.Data.2.3.0/lib/net40/FSharp.Data.dll"
 open FSharp.Data
 
 type Sample = CsvProvider<"titanic.csv">
@@ -86,3 +86,5 @@ let ``classification example`` () =
     |> Seq.map (fun (o,l) -> 
         rfClassification o, l)
     |> accuracy
+
+``classification example``()
