@@ -34,3 +34,18 @@ let accuracy =
         else 0.)
 
 printfn "Accuracy:  %.2f" accuracy
+
+let averageFare = 
+    sample.Rows 
+    |> Seq.averageBy (fun row -> row.Fare)
+
+let regression (obs:Sample.Row) = averageFare
+
+let rmse = 
+    sample.Rows
+    |> Seq.averageBy (fun o -> 
+        pown (regression o - o.Fare) 2)
+    |> float
+    |> sqrt
+
+printfn "RMSE:  %.2f" rmse
