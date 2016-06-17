@@ -7,7 +7,7 @@ TODO
 [ ] Explode: how should I handle unexpected but not missing values?
 [ ] Configuration for various algorithms
 [ ] Metrics (RMSE, Precision, ...)
-[ ] Verbose/Quiet mode?
+[ ] Verbose / Quiet mode?
 [ ] Reporting
 [ ] Real-time update on convergence etc...?
 [ ] Algorithms: use functions, or classes?
@@ -16,3 +16,8 @@ TODO
 [ ] Build in k-fold
 [ ] Build in feature importance analyzis using random perturbation
 [ ] What should a classifier return? Class, Classes + Probabilities?
+[ ] Strategy for parallelization
+[ ] Ensembles / composition of models
+[ ] Multiclass, multilabels
+[ ] Regularization, ex: Lasso, Ridge...
+[ ] Handling of algorithm-specific info, ex: coeff stats on logistic

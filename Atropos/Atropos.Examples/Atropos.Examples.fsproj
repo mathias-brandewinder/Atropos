@@ -45,7 +45,10 @@
   <ItemGroup>
     <None Include="titanic.csv" />
     <None Include="SampleDescription.fsx" />
-    <None Include="RandomForest.fsx" />
+    <None Include="RegressionFeatures.fsx" />
+    <None Include="ClassificationFeatures.fsx" />
+    <None Include="RandomForest.Regression.fsx" />
+    <None Include="RandomForest.Classification.fsx" />
     <None Include="LogisticRegression.fsx" />
     <None Include="SVM.fsx" />
   </ItemGroup>
