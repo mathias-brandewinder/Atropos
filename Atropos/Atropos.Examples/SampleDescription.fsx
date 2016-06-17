@@ -16,3 +16,21 @@ sample.Rows
 sample.Rows 
 |> Seq.countBy (fun row -> row.Survived)
 |> Seq.iter (fun (lbl,cnt) -> printfn "%A: %i" lbl cnt)
+
+// baseline of naive classifier
+let mostFrequentClass = 
+    sample.Rows 
+    |> Seq.countBy (fun row -> row.Survived)
+    |> Seq.maxBy snd
+    |> fst
+
+let classifier (obs:Sample.Row) = mostFrequentClass
+
+let accuracy = 
+    sample.Rows
+    |> Seq.averageBy (fun o -> 
+        if classifier o = o.Survived
+        then 1.
+        else 0.)
+
+printfn "Accuracy:  %.2f" accuracy
