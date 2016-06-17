@@ -23,28 +23,48 @@ let ``classification model`` () =
     // this should be simplified
     let ``passenger age`` : FeatureLearner<Passenger,float> =
         fun sample ->
-            let avg = avgReplace (sample |> Seq.map (fun (p,_) -> p.Age))
-            fun pass -> pass.Age |> avg |> Continuous
+            fun pass -> pass.Age |> Continuous
 
     let ``passenger class`` : FeatureLearner<Passenger,float> =
         fun sample ->
             fun pass -> Discrete ([|"1";"2";"3"|], pass.Pclass |> string) 
 
-    let gender : FeatureLearner<Passenger,float> =
+    let ``passenger gender`` : FeatureLearner<Passenger,float> =
         fun sample ->
             fun pass -> Discrete ([|"male";"female"|], pass.Sex)
 
     let model = [
         ``passenger age``
         ``passenger class``
-        gender
+        ``passenger gender``
         ]
 
+    let config = { Logistic.DefaultConfig with MaxIterations = 10000 }
     let logRegression = 
         survivalSample
-        |> Logistic.regression Logistic.DefaultConfig model 
+        |> Logistic.regression config model 
 
     survivalSample
-    |> Seq.map (fun (o,l) -> 
-        logRegression o, l)
-    |> RMSE
+    |> Seq.iter (fun (o,l) -> 
+        printfn "Pred: %.3f Real: %.1f" (logRegression o) l)
+    
+    let rmse = 
+        survivalSample
+        |> Seq.map (fun (o,l) -> 
+            logRegression o, l)
+        |> Seq.filter (fun (p,l) -> number p)
+        |> RMSE
+
+    let accuracy = 
+        survivalSample
+        |> Seq.map (fun (o,l) -> 
+            logRegression o, l)
+        |> Seq.filter (fun (p,l) -> number p)
+        // TODO figure out what to do there! this is nasty.
+        |> Seq.map (fun (p,l) -> (if p > 0.5 then 1. else 0.),l)
+        |> accuracy
+
+    printfn "RMSE:      %.2f" rmse
+    printfn "Accuracy:  %.2f" accuracy
+
+``classification model`` ()
