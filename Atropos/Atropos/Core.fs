@@ -25,7 +25,9 @@ module Core =
     // would be redundant.
     // missing/unexpected values result
     // in a NaN-filled array.
-    // TODO confirm that 1-less column is OK.
+    // TODO confirm that 1-less column is OK:
+    // definitely right for regression, but
+    // what about trees for instance?
     let explode (values:string[]) (value:string) =
         if (values |> Array.contains value)
         then

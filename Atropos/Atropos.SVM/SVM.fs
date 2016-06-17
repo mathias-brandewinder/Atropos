@@ -9,9 +9,17 @@ module SVM =
     open Accord.MachineLearning.VectorMachines.Learning
     open Accord.Statistics.Kernels
 
-    type Config = { Kernel:IKernel }
-    let DefaultConfig = { Kernel = Linear() }
+    type Config = { 
+        Kernel:IKernel
+        Tolerance:float
+        Complexity:float Option // Some(c) indicates a user-defined value
+        }
 
+    let DefaultConfig = { 
+        Kernel = Linear()
+        Tolerance = 1e-2
+        Complexity = None }
+    
     let classification : Config -> Learner<'Obs,'Lbl> =
 
         fun config ->
@@ -55,7 +63,14 @@ module SVM =
                         fun (svm: KernelSupportVectorMachine) 
                             (classInputs: float[][]) 
                             (classOutputs: int[]) (i: int) (j: int) -> 
+                            
                             let strategy = SequentialMinimalOptimization(svm, classInputs, classOutputs)
+                            strategy.Tolerance <- config.Tolerance
+                            match config.Complexity with
+                            | Some(complexity) ->
+                                strategy.Complexity <- complexity
+                            | None -> ignore ()
+                            
                             strategy :> ISupportVectorMachineLearning
 
                     let svm = new MulticlassSupportVectorMachine(featuresCount, kernel, classes)
@@ -63,7 +78,8 @@ module SVM =
                     let config = SupportVectorMachineLearningConfigurationFunction(algorithm)
                     learner.Algorithm <- config
 
-                    let error = learner.Run()                
+                    let error = learner.Run()
+                            
                     let predictor = 
                         featurize >> svm.Compute >> denormalizer
 

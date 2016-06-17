@@ -6,7 +6,7 @@ TODO
     - discrete: is it binary
     - continuous: is it in [0;1]
     - if continuous, should I normalize if I have bounds information?
-    - 'positive/negatives per case'
+    - 'positive/negative per case'
     - how about multi-class, multi-label?
 *)
 
@@ -57,14 +57,17 @@ module Logistic =
 
                     let logisticReg = LogisticRegression(featuresCount)
                     let learner = LogisticGradientDescent(logisticReg)
+                    let sampleSize = labels.Length |> float
 
+                    // TODO: collect metrics of interest during learning?
                     let rec improve iteration =
-
-                        let delta = learner.Run(features,labels)
-                    
-                        if delta < config.MinDelta
-                        then ignore ()
-                        elif iteration > config.MaxIterations
+                        // TODO confirm what delta is: currently the 
+                        // delta-based termination rule causes weird results.
+                        let delta = learner.Run(features,labels) // sampleSize
+//                        printfn "Delta: %.3f" delta
+//                        if delta < config.MinDelta
+//                        then ignore ()
+                        if iteration > config.MaxIterations
                         then ignore ()
                         else improve (iteration + 1)
                 
