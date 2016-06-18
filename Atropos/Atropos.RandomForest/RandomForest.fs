@@ -29,10 +29,7 @@ module RandomForest =
             fun model ->
                 fun sample ->
 
-                    let featurize =
-                        model
-                        |> learnFeatures sample
-                        |> featurizer
+                    let featurize = featuresExtractor model sample
 
                     let trainingData =
                         sample
@@ -71,10 +68,7 @@ module RandomForest =
             fun model ->
                 fun sample ->
 
-                    let featurize =
-                        model
-                        |> learnFeatures sample
-                        |> featurizer
+                    let featurize = featuresExtractor model sample
 
                     // identify unique labels
                     // should probably also pass in

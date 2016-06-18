@@ -13,8 +13,8 @@ open Atropos.RandomForest
 
 let config = { 
     RandomForest.DefaultConfig with 
-        Trees = 100
-        FeaturesUsed = fun _ -> 2
+        Trees = 1000
+        FeaturesUsed = fun _ -> 3
         ProportionHeldOut = 0.2
     }
 

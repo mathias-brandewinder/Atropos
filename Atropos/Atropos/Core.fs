@@ -63,7 +63,7 @@ module Core =
                 |> Seq.map (fun learner -> learner sample)
 
     // Apply features to an observation, and 
-    // transform it into a float[] (a vector)
+    // transform it into a float[] (a vector).
     let featurizer = 
         fun (features:Feature<'Obs> seq) ->
             fun (obs:'Obs) ->
@@ -75,3 +75,11 @@ module Core =
                     | Discrete(xs,x) -> explode xs x)
                 |> Seq.toArray
                 |> Array.collect id
+
+    // create a function that, given a sample
+    // and a model, will take an observation
+    // and return a vector of features.
+    let featuresExtractor model sample =
+        model
+        |> learnFeatures sample
+        |> featurizer

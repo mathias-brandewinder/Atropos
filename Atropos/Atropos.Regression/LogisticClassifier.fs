@@ -1,17 +1,7 @@
 ﻿namespace Atropos.Regression
 
-(*
-TODO
-- handle different label options
-    - discrete: is it binary
-    - continuous: is it in [0;1]
-    - if continuous, should I normalize if I have bounds information?
-    - 'positive/negative per case'
-    - how about multi-class, multi-label?
-*)
-
 [<RequireQualifiedAccess>]
-module Logistic = 
+module LogisticClassifier =
 
     open Atropos.Utilities
     open Atropos.Core
@@ -21,17 +11,13 @@ module Logistic =
     type Config = {
         // maximum iterations during learning
         MaxIterations : int
-        // if change % falls under that level
-        // during learning, exit.
-        MinDelta: float
         }
 
     let DefaultConfig = {
         MaxIterations = 100 
-        MinDelta = 0.001
         }
 
-    let regression : Config -> Learner<'Obs,float> =
+    let regression : Config -> Learner<'Obs,'Lbl> =
 
         fun config ->
             fun model ->
@@ -39,13 +25,33 @@ module Logistic =
 
                     let featurize = featuresExtractor model sample
 
+                    let cases =
+                        sample
+                        |> Seq.map (fun (_,lbl) -> lbl)
+                        |> Seq.distinct
+                        |> Seq.toArray
+
+                    // Logistic should be binary.
+                    if cases.Length <> 2 then failwith "should be 2 cases"
+
+                    let normalize label =
+                        cases
+                        |> Array.findIndex (fun case -> case = label)
+                        |> float
+
+                    let denormalize proba =
+                        let index = 
+                            if proba > 0.5 then 1 else 0
+                        cases.[index]
+
                     let features, labels =
                         sample
                         |> Seq.map (fun (obs,lbl) ->
                             let fs = featurize obs
-                            fs,lbl)
+                            let l = normalize lbl
+                            fs,l)
                         // discard any row with missing data
-                        |> Seq.filter (fun (obs,lbl) -> numbers obs && number lbl)
+                        |> Seq.filter (fun (obs,_) -> numbers obs)
                         // TODO: can I have one-shot Array extraction?
                         |> Seq.toArray
                         |> Array.unzip
@@ -56,14 +62,8 @@ module Logistic =
                     let learner = LogisticGradientDescent(logisticReg)
                     let sampleSize = labels.Length |> float
 
-                    // TODO: collect metrics of interest during learning?
                     let rec improve iteration =
-                        // TODO confirm what delta is: currently the 
-                        // delta-based termination rule causes weird results.
-                        let delta = learner.Run(features,labels) // sampleSize
-//                        printfn "Delta: %.3f" delta
-//                        if delta < config.MinDelta
-//                        then ignore ()
+                        let _ = learner.Run(features,labels)
                         if iteration > config.MaxIterations
                         then ignore ()
                         else improve (iteration + 1)
@@ -71,6 +71,6 @@ module Logistic =
                     improve 0
                 
                     let predictor = 
-                        featurize >> logisticReg.Compute
+                        featurize >> logisticReg.Compute >> denormalize
 
                     predictor
