@@ -21,3 +21,10 @@ TODO
 [ ] Multiclass, multilabels
 [ ] Regularization, ex: Lasso, Ridge...
 [ ] Handling of algorithm-specific info, ex: coeff stats on logistic
+[ ] Shuffle, Mini-Batch, ...
+
+Questions
+- can I express feature like 'age under 10, over 65 -> kid, adult, senior' ?
+- can I express feature like 'if class is 3, cheap, else expensive' ?
+- send updates via events? to mailbox (ex: time/metric/value).
+- interrupt, and restart learning? ex: learning is too slow -> stop, learning is insufficient -> more iterations.

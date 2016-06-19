@@ -17,7 +17,24 @@ module Core =
     type Variable =
         | Discrete of string[] * string
         | Continuous of float
-    
+
+    type Predicate<'Obs> = 'Obs -> bool
+    // define names for each case, and a predicate
+    // that identifies the case.
+    // this is expected to be mutually exclusive,
+    // and collectively exhaustive.
+    type FeatureDefinition<'Obs> = (string * Predicate<'Obs>) list
+
+    // TODO make it consistent so that unexpected labels
+    // do not throw. Use TryFind?
+    let discreteFrom (f:FeatureDefinition<'Obs>) (obs:'Obs) =
+        // extract the case names
+        f |> Seq.map fst |> Seq.toArray,
+        // ... and the case for the observation.
+        f 
+        |> Seq.find (fun (_,pred) -> pred obs)
+        |> fst
+
     // transform a categorical feature
     // into columns marked 0 or 1.
     // we create one column less than
@@ -47,6 +64,12 @@ module Core =
     type FeatureLearner<'Obs,'Lbl> = 
         Example<'Obs,'Lbl> seq -> 
             Feature<'Obs>
+
+    let fromDefinition (definition:FeatureDefinition<'Obs>) : FeatureLearner<'Obs,'Lbl> =
+        let from = discreteFrom definition
+        fun sample ->
+            fun pass -> 
+                from pass |> Discrete
 
     // A Learner uses a collection of Features
     // and a Sample to learn a Predictor.

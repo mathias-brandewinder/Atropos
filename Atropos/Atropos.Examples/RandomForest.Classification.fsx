@@ -24,5 +24,6 @@ let rfClassification =
 
 sample
 |> Seq.map (fun (o,l) -> 
+    printfn "Pred: %A; Real: %A" (rfClassification o) l
     rfClassification o, l)
 |> accuracy
