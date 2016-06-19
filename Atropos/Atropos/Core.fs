@@ -29,11 +29,16 @@ module Core =
     // do not throw. Use TryFind?
     let discreteFrom (f:FeatureDefinition<'Obs>) (obs:'Obs) =
         // extract the case names
-        f |> Seq.map fst |> Seq.toArray,
+        let cases = f |> Seq.map fst |> Seq.toArray
         // ... and the case for the observation.
-        f 
-        |> Seq.find (fun (_,pred) -> pred obs)
-        |> fst
+        let state = 
+            f 
+            |> Seq.tryFind (fun (_,pred) -> pred obs)
+            |> Option.map fst
+        cases,
+        match state with
+        | None -> null // this is pretty awful
+        | Some(name) -> name
 
     // transform a categorical feature
     // into columns marked 0 or 1.
