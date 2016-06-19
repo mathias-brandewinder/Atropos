@@ -49,8 +49,9 @@
     <None Include="ClassificationFeatures.fsx" />
     <None Include="RandomForest.Regression.fsx" />
     <None Include="RandomForest.Classification.fsx" />
-    <None Include="LogisticRegression.fsx" />
+    <None Include="LogisticClassification.fsx" />
     <None Include="SVM.fsx" />
+    <None Include="LogisticRegression.fsx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Atropos.RandomForest\Atropos.RandomForest.fsproj">

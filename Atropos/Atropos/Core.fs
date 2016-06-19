@@ -17,7 +17,29 @@ module Core =
     type Variable =
         | Discrete of string[] * string
         | Continuous of float
-    
+
+    type Predicate<'Obs> = 'Obs -> bool
+    // define names for each case, and a predicate
+    // that identifies the case.
+    // this is expected to be mutually exclusive,
+    // and collectively exhaustive.
+    type FeatureDefinition<'Obs> = (string * Predicate<'Obs>) list
+
+    // TODO make it consistent so that unexpected labels
+    // do not throw. Use TryFind?
+    let discreteFrom (f:FeatureDefinition<'Obs>) (obs:'Obs) =
+        // extract the case names
+        let cases = f |> Seq.map fst |> Seq.toArray
+        // ... and the case for the observation.
+        let state = 
+            f 
+            |> Seq.tryFind (fun (_,pred) -> pred obs)
+            |> Option.map fst
+        cases,
+        match state with
+        | None -> null // this is pretty awful
+        | Some(name) -> name
+
     // transform a categorical feature
     // into columns marked 0 or 1.
     // we create one column less than
@@ -48,6 +70,12 @@ module Core =
         Example<'Obs,'Lbl> seq -> 
             Feature<'Obs>
 
+    let fromDefinition (definition:FeatureDefinition<'Obs>) : FeatureLearner<'Obs,'Lbl> =
+        let from = discreteFrom definition
+        fun sample ->
+            fun pass -> 
+                from pass |> Discrete
+
     // A Learner uses a collection of Features
     // and a Sample to learn a Predictor.
     type Learner<'Obs,'Lbl> =
@@ -63,7 +91,7 @@ module Core =
                 |> Seq.map (fun learner -> learner sample)
 
     // Apply features to an observation, and 
-    // transform it into a float[] (a vector)
+    // transform it into a float[] (a vector).
     let featurizer = 
         fun (features:Feature<'Obs> seq) ->
             fun (obs:'Obs) ->
@@ -75,3 +103,11 @@ module Core =
                     | Discrete(xs,x) -> explode xs x)
                 |> Seq.toArray
                 |> Array.collect id
+
+    // create a function that, given a sample
+    // and a model, will take an observation
+    // and return a vector of features.
+    let featuresExtractor model sample =
+        model
+        |> learnFeatures sample
+        |> featurizer

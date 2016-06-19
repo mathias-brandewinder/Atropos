@@ -13,8 +13,8 @@ open Atropos.RandomForest
 
 let config = { 
     RandomForest.DefaultConfig with 
-        Trees = 100
-        FeaturesUsed = fun _ -> 2
+        Trees = 1000
+        FeaturesUsed = fun _ -> 3
         ProportionHeldOut = 0.2
     }
 
@@ -24,5 +24,6 @@ let rfClassification =
 
 sample
 |> Seq.map (fun (o,l) -> 
+    printfn "Pred: %A; Real: %A" (rfClassification o) l
     rfClassification o, l)
 |> accuracy

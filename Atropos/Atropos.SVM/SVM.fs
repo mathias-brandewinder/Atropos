@@ -26,10 +26,7 @@ module SVM =
             fun model ->
                 fun sample ->
 
-                    let featurize =
-                        model
-                        |> learnFeatures sample
-                        |> featurizer
+                    let featurize = featuresExtractor model sample
 
                     let cases =
                         sample

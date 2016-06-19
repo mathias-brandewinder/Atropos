@@ -21,15 +21,33 @@ let ``passenger age`` : FeatureLearner<Passenger,bool> =
         fun pass -> pass.Age |> Continuous
 
 let ``passenger class`` : FeatureLearner<Passenger,bool> =
+    
+    let definition:FeatureDefinition<Passenger> = [
+        "Class 1", fun p -> p.Pclass = 1
+        "Class 2", fun p -> p.Pclass = 2
+        "Class 3", fun p -> p.Pclass = 3
+        ]
+    let from = discreteFrom definition
+
     fun sample ->
-        fun pass -> Discrete ([|"1";"2";"3"|], pass.Pclass |> string) 
+        fun pass -> 
+            from pass |> Discrete
+            //Discrete ([|"1";"2";"3"|], pass.Pclass |> string) 
 
 let ``passenger gender`` : FeatureLearner<Passenger,bool> =
     fun sample ->
         fun pass -> Discrete ([|"male";"female"|], pass.Sex)
 
+let ``adult`` : FeatureLearner<Passenger,bool> =
+    [
+        "Kid", fun (p:Passenger) -> p.Age < 12.0
+        "Adult", fun p -> p.Age >= 12.0
+    ]
+    |> fromDefinition  
+
 let model = [
     ``passenger age``
     ``passenger class``
     ``passenger gender`` 
+    ``adult``
     ]
