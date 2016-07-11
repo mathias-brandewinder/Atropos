@@ -28,3 +28,12 @@ module Utilities =
 
     let avgReplace (xs:float seq) =
         naReplace (average xs)
+
+    let modeReplace (xs: float seq) = 
+        let mode xs = 
+            xs 
+            |> Seq.filter number
+            |> Seq.groupBy id
+            |> Seq.maxBy fst
+            |> fst
+        naReplace (mode xs)
