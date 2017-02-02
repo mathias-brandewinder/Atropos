@@ -2,14 +2,15 @@
 Classification example, using AlgLib Random Forest
 *)
 
+
 #load "ClassificationFeatures.fsx"
 open ClassificationFeatures
 
-#r @"../Atropos/Atropos.RandomForest/bin/Debug/Atropos.RandomForest.dll"
 #r @"alglibnet2/lib/alglibnet2.dll"
 
+#load "RandomForest.fsx"
 open Atropos.Metrics
-open Atropos.RandomForest
+open RandomForest
 
 let config = { 
     RandomForest.DefaultConfig with 

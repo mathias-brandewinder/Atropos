@@ -1,5 +1,4 @@
-﻿#I @"../../packages/"
-#r @"../Atropos/Atropos/bin/Debug/Atropos.dll"
+﻿#load "Dependencies.fsx"
 
 open Atropos.Core
 open Atropos.Utilities
@@ -8,7 +7,7 @@ open Atropos.Metrics
 #r @"FSharp.Data/lib/net40/FSharp.Data.dll"
 open FSharp.Data
 
-type Sample = CsvProvider<"titanic.csv">
+type Sample = CsvProvider<"Data/titanic.csv">
 type Passenger = Sample.Row
 
 let sample = 

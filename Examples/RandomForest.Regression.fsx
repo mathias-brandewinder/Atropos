@@ -2,14 +2,16 @@
 Regression example, using AlgLib Random Forest
 *)
 
+#load "Dependencies.fsx"
 #load "RegressionFeatures.fsx"
 open RegressionFeatures
 
-#r @"../Atropos/Atropos.RandomForest/bin/Debug/Atropos.RandomForest.dll"
+#load @"RandomForest.fsx"
+#I "../packages/"
 #r @"alglibnet2/lib/alglibnet2.dll"
 
 open Atropos.Metrics
-open Atropos.RandomForest
+open RandomForest
 
 let config = { 
     RandomForest.DefaultConfig with 

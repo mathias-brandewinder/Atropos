@@ -1,6 +1,5 @@
-﻿namespace Atropos.RandomForest
+﻿#load "Dependencies.fsx"
 
-[<RequireQualifiedAccess>]
 module RandomForest = 
 
     open Atropos.Utilities
