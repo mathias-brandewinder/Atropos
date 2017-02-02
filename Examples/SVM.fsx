@@ -3,7 +3,10 @@ Classification example, using Accord Support Vector Machine
 *)
 
 #load "Dependencies.fsx"
-#r @"Accord.Statistics/lib/net45/Accord.Statistics.dll"
+#r "Accord/lib/net46/Accord.dll"
+#r "Accord.Math/lib/net46/Accord.Math.dll"
+#r "Accord.MachineLearning/lib/net46/Accord.MachineLearning.dll"
+#r @"Accord.Statistics/lib/net46/Accord.Statistics.dll"
 
 module SVM =
 
@@ -94,13 +97,7 @@ module SVM =
 #load "ClassificationFeatures.fsx"
 open ClassificationFeatures
 
-#I @"../../packages/"
-#r @"Accord.Statistics/lib/net45/Accord.Statistics.dll"
-#r @"../Atropos/Atropos/bin/Debug/Atropos.dll"
-#r @"../Atropos/Atropos.SVM/bin/Debug/Atropos.SVM.dll"
-
 open Atropos.Metrics
-open Atropos.SVM
 open Accord.Statistics.Kernels
 
 let config = { 

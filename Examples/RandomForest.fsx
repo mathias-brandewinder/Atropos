@@ -1,4 +1,5 @@
 ﻿#load "Dependencies.fsx"
+#r @"alglibnet2/lib/alglibnet2.dll"
 
 module RandomForest = 
 
