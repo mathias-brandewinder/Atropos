@@ -1,5 +1,6 @@
-source https://www.nuget.org/api/v2
+framework: net46
+source https://nuget.org/api/v2
 
 nuget alglibnet2
-nuget fsharp.data
-nuget accord.machinelearning
+nuget FSharp.Data
+nuget Accord.MachineLearning

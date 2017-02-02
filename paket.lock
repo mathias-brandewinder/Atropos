@@ -1,0 +1,15 @@
+FRAMEWORK: NET46
+NUGET
+  remote: https://www.nuget.org/api/v2
+    Accord (3.4)
+    Accord.MachineLearning (3.4)
+      Accord (>= 3.4)
+      Accord.Math (>= 3.4)
+      Accord.Statistics (>= 3.4)
+    Accord.Math (3.4)
+      Accord (>= 3.4)
+    Accord.Statistics (3.4)
+      Accord (>= 3.4)
+      Accord.Math (>= 3.4)
+    alglibnet2 (0.0)
+    FSharp.Data (2.3.2)
