@@ -14,6 +14,9 @@ module Core =
     type BinaryLabel<'Lbl> (lbl:'Lbl->bool) =
         member this.Label (x:'Lbl) = lbl x
 
+    type ContinuousLabel<'Lbl> (lbl:'Lbl->float) =
+        member this.Label (x:'Lbl) = lbl x
+
     let caseMatch matches value =
         let cases = matches |> Seq.length
         let index = 
