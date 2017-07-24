@@ -1,5 +1,20 @@
 namespace Atropos
 
+module Sampling = 
+
+    open System
+
+    // Fisher-Yates shuffle
+    // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_.22inside-out.22_algorithm
+    let shuffle (rng:Random) (xs:_[]) =
+        let ys = Array.copy xs
+        for i in 0 .. (xs.Length - 1) do
+            let j = rng.Next(0, i + 1)
+            if i <> j then 
+                ys.[i] <- ys.[j]
+            ys.[j] <- xs.[i]
+        ys
+
 module Core = 
 
     /// A Feature can be either:
