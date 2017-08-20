@@ -14,45 +14,66 @@ open Accord.Statistics
 open Accord.Statistics.Models.Regression
 open Accord.Statistics.Models.Regression.Fitting
 
-// logistic should support 3 cases
-// y = bool, y = int, y = float
-// also potentially weights on each pair
-let logistic<'Obs,'Lbl> 
-    (training: ('Obs * 'Lbl) seq) 
-    (features: Features<'Obs>) 
-    (label: BinaryLabel<'Lbl>) =
+[<RequireQualifiedAccess>]
+module Logistic =
 
-    let input,output =
-        training
-        |> Seq.map (fun (obs,lbl) -> 
-            prepare features obs,
-            label.Label lbl
-            )
-        |> Seq.filter (fun (xs,y) -> 
-            xs |> Seq.forall (fun x -> x |> Option.isSome))
-        |> Seq.map (fun (xs,y) -> 
-            xs |> Array.map (fun x -> x.Value) |> Seq.collect id |> Seq.toArray, y)
-        |> Seq.toArray
-        |> Array.unzip
+    type Config = {
+        MaxIterations: int
+        Tolerance: float
+        }
+
+    let defaultConfig = {
+        MaxIterations = 100
+        Tolerance = 1.e-4
+        } 
     
-    let learner = IterativeReweightedLeastSquares<LogisticRegression>()
+    // logistic should support 3 cases
+    // y = bool, y = int, y = float
+    // also potentially weights on each pair
+    let train<'Obs,'Lbl> 
+        (config:Config)
+        (training:('Obs*'Lbl) seq) 
+        (features:Features<'Obs>) 
+        (label:BinaryLabel<'Lbl>) =
 
-    learner.MaxIterations <- 100
-    learner.Tolerance <- 1.e-4
-    let regression = learner.Learn (input,output)
+        let input,output =
+            training
+            |> Seq.map (fun (obs,lbl) -> 
+                prepare features obs,
+                label.Label lbl
+                )
+            |> Seq.filter (fun (xs,y) -> 
+                xs 
+                |> Seq.forall (Option.isSome))
+            |> Seq.map (fun (xs,y) -> 
+                xs 
+                |> Array.map (fun x -> x.Value) 
+                |> Seq.collect id 
+                |> Seq.toArray,
+                y
+                )
+            |> Seq.toArray
+            |> Array.unzip
+        
+        let learner = IterativeReweightedLeastSquares<LogisticRegression>()
+       
+        learner.MaxIterations <- config.MaxIterations
+        learner.Tolerance <- config.Tolerance
 
-    let predict obs =
-        let featurized = prepare features obs
-        if (isComplete featurized)
-        then 
-            featurized
-            |> Array.map (fun xs -> xs.Value)
-            |> Array.collect id 
-            |> regression.Decide
-            |> Some
-        else None
+        let regression = learner.Learn (input,output)
 
-    predict, regression
+        let predict obs =
+            let featurized = prepare features obs
+            if (isComplete featurized)
+            then 
+                featurized
+                |> Array.map (fun xs -> xs.Value)
+                |> Array.collect id 
+                |> regression.Decide
+                |> Some
+            else None
+
+        predict, regression
 
 // test on Titanic
 
@@ -77,10 +98,10 @@ let features =
 
 let labels = (fun (p:Passenger) -> p.Survived) |> BinaryLabel
 
-let predictor, _ = logistic training features labels
+let predictor, _ = Logistic.train Logistic.defaultConfig training features labels
+
+open Atropos.Measures
 
 sample
 |> Seq.map (fun p -> p.Survived, predictor p)
-|> Seq.take 100
-|> Seq.countBy id
-|> Seq.toList
+|> accuracy

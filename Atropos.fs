@@ -44,7 +44,7 @@ module Core =
         then None
         elif System.Double.IsNaN x
         then None
-        else Some x    
+        else Some x 
 
     let inline continuous x = float x |> Continuous
 
@@ -58,7 +58,10 @@ module Core =
                 properNumber v
                 |> Option.map (Seq.singleton)
             | Categorical(index,cases) ->
-                Seq.init (cases - 1) (fun i -> if i = index then 1. else 0.)
+                Seq.init 
+                    (cases - 1)
+                        (fun i -> 
+                            if i = index then 1. else 0.)
                 |> Some
         with
         | _ -> None 
@@ -74,3 +77,19 @@ module Core =
     let isComplete<'T> (xs:Option<'T> seq) = 
         xs |> Seq.forall (available)
 
+module Measures =
+
+    let included (xs:('Lbl*Option<'Lbl>)seq) =
+        xs 
+        |> Seq.filter (fun (act,pred) -> 
+            Option.isSome pred)
+        |> Seq.map (fun (act,pred) ->
+            act, pred.Value)
+
+    // proportion of cases where predictor agrees 
+    // with the true value.
+    let accuracy (xs:('Lbl*Option<'Lbl>)seq) =
+        xs
+        |> included
+        |> Seq.averageBy (fun (act,pred) ->
+            if act = pred then 1. else 0.)
