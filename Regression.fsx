@@ -70,7 +70,8 @@ let features =
         (fun (p:Passenger) -> p.Age) >> continuous
         (fun p -> p.Embarked) >> categorical ["C";"S";"Q"]
         (fun p -> p.Pclass) >> categorical [1;2;3]            
-        (fun p -> p.Sex) >> categorical ["male";"female"]            
+        (fun p -> p.Sex) >> categorical ["male";"female"]
+        (fun p -> p.Age) >> binned [ 6.; 12.; 18.]       
     ]
 
 let labels = (fun (p:Passenger) -> p.Fare |> float) |> ContinuousLabel

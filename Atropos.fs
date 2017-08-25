@@ -39,6 +39,19 @@ module Core =
             |> Seq.findIndex (fun m -> m = value)
         (index,cases)
 
+    let orderMatch bins value =
+        // this assumes bins are pre-sorted
+        let values = 
+            bins 
+            |> Seq.length
+        let index =
+            bins
+            |> Seq.tryFindIndex (fun b -> value <= b)
+            |> function 
+                | Some(i) -> i
+                | None -> values
+        (index,values+1)
+
     let properNumber (x:float) =
         if System.Double.IsInfinity x
         then None
@@ -48,7 +61,12 @@ module Core =
 
     let inline continuous x = float x |> Continuous
 
+    // TODO check boolean category, like [true;false]
     let categorical matches = caseMatch matches >> Categorical
+
+    // TODO check what happens for NaN, infinity etc...
+    // in case 'a is a float
+    let binned values = orderMatch values >> Categorical
 
     let encode<'Obs> (feature:'Obs -> Feature) (obs:'Obs) =
         try
