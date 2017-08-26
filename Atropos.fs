@@ -52,16 +52,18 @@ module Core =
                 | None -> values
         (index,values+1)
 
+    let isNumber (x:float) =
+        System.Double.IsInfinity x
+        || System.Double.IsNaN x
+        |> not
+    
     let properNumber (x:float) =
-        if System.Double.IsInfinity x
-        then None
-        elif System.Double.IsNaN x
-        then None
-        else Some x 
+        if isNumber x
+        then Some x
+        else None 
 
     let inline continuous x = float x |> Continuous
 
-    // TODO check boolean category, like [true;false]
     let categorical matches = caseMatch matches >> Categorical
 
     // TODO check what happens for NaN, infinity etc...

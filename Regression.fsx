@@ -26,6 +26,7 @@ let linear<'Obs,'Lbl>
             prepare features obs,
             label.Label lbl
             )
+        |> Seq.filter (fun (xs,y) -> isNumber y)
         |> Seq.filter (fun (xs,y) -> 
             xs |> Seq.forall (fun x -> x |> Option.isSome))
         |> Seq.map (fun (xs,y) -> 
@@ -71,7 +72,8 @@ let features =
         (fun p -> p.Embarked) >> categorical ["C";"S";"Q"]
         (fun p -> p.Pclass) >> categorical [1;2;3]            
         (fun p -> p.Sex) >> categorical ["male";"female"]
-        (fun p -> p.Age) >> binned [ 6.; 12.; 18.]       
+        (fun p -> p.Age) >> binned [ 6.; 12.; 18.]
+        (fun p -> p.Survived) >> categorical [true;false]     
     ]
 
 let labels = (fun (p:Passenger) -> p.Fare |> float) |> ContinuousLabel
