@@ -14,44 +14,55 @@ open Accord.Statistics
 open Accord.Statistics.Models.Regression
 open Accord.Statistics.Models.Regression.Fitting
 
-// potentially weights on each pair
-let linear<'Obs,'Lbl> 
-    (training: ('Obs * 'Lbl) seq) 
-    (features: Features<'Obs>) 
-    (label: ContinuousLabel<'Lbl>) =
+[<RequireQualifiedAccess>]
+module Regression =
 
-    let input,output =
-        training
-        |> Seq.map (fun (obs,lbl) -> 
-            prepare features obs,
-            label.Label lbl
-            )
-        |> Seq.filter (fun (xs,y) -> isNumber y)
-        |> Seq.filter (fun (xs,y) -> 
-            xs |> Seq.forall (fun x -> x |> Option.isSome))
-        |> Seq.map (fun (xs,y) -> 
-            xs |> Array.map (fun x -> x.Value) |> Seq.collect id |> Seq.toArray, y)
-        |> Seq.toArray
-        |> Array.unzip
-    
-    let learner = Linear.OrdinaryLeastSquares()
-    // how to handle specialized params like that?
-    learner.IsRobust <- true
-    
-    let regression = learner.Learn (input,output)
+    type Config = {
+        Robust:bool
+        }
 
-    let predict obs =
-        let featurized = prepare features obs
-        if (isComplete featurized)
-        then 
-            featurized
-            |> Array.map (fun xs -> xs.Value)
-            |> Array.collect id 
-            |> regression.Transform
-            |> Some
-        else None
+    let defaultConfig = {
+        Robust = true
+        } 
 
-    predict, regression
+    // potentially weights on each pair
+    let train<'Obs,'Lbl> 
+        (config:Config)
+        (training: ('Obs * 'Lbl) seq) 
+        (features: Features<'Obs>) 
+        (label: ContinuousLabel<'Lbl>) =
+
+        let input,output =
+            training
+            |> Seq.map (fun (obs,lbl) -> 
+                prepare features obs,
+                label.Label lbl
+                )
+            |> Seq.filter (fun (xs,y) -> isNumber y)
+            |> Seq.filter (fun (xs,y) -> 
+                xs |> Seq.forall (fun x -> x |> Option.isSome))
+            |> Seq.map (fun (xs,y) -> 
+                xs |> Array.map (fun x -> x.Value) |> Seq.collect id |> Seq.toArray, y)
+            |> Seq.toArray
+            |> Array.unzip
+        
+        let learner = Linear.OrdinaryLeastSquares()
+        learner.IsRobust <- config.Robust
+        
+        let regression = learner.Learn (input,output)
+
+        let predict obs =
+            let featurized = prepare features obs
+            if (isComplete featurized)
+            then 
+                featurized
+                |> Array.map (fun xs -> xs.Value)
+                |> Array.collect id 
+                |> regression.Transform
+                |> Some
+            else None
+
+        predict, regression
 
 // test on Titanic
 
@@ -78,7 +89,7 @@ let features =
 
 let labels = (fun (p:Passenger) -> p.Fare |> float) |> ContinuousLabel
 
-let predictor, _ = linear training features labels
+let predictor, _ = Regression.train Regression.defaultConfig training features labels
 
 sample
 |> Seq.map (fun p -> 
