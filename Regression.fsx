@@ -79,12 +79,12 @@ let training = sample |> Seq.map (fun x -> x,x)
 
 let features = 
     [
-        (fun (p:Passenger) -> p.Age) >> continuous
-        (fun p -> p.Embarked) >> categorical ["C";"S";"Q"]
-        (fun p -> p.Pclass) >> categorical [1;2;3]            
-        (fun p -> p.Sex) >> categorical ["male";"female"]
-        (fun p -> p.Age) >> binned [ 6.; 12.; 18.]
-        (fun p -> p.Survived) >> categorical [true;false]     
+        (fun (p:Passenger) -> p.Age) |> continuous
+        (fun (p:Passenger) -> p.Embarked) |> categorical ["C";"S";"Q"]
+        (fun (p:Passenger) -> p.Pclass) |> categorical [1;2;3]            
+        (fun (p:Passenger) -> p.Sex) |> categorical ["male";"female"]
+        (fun (p:Passenger) -> p.Age) |> binned [ 6.; 12.; 18.]
+        (fun (p:Passenger) -> p.Survived) |> categorical [true;false]     
     ]
 
 let labels = (fun (p:Passenger) -> p.Fare |> float) |> ContinuousLabel

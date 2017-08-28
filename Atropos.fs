@@ -20,11 +20,25 @@ module Core =
     /// A Feature can be either:
     /// Continuous: it can take any float value,
     /// Categorical: it is one of a set of possible cases.
-    type Feature =
-        | Continuous  of float
-        | Categorical of int * int
+    type Value<'Obs,'T> =
+        | Valid of 'T
+        | Invalid of 'Obs * string
 
-    type Features<'Obs> = ('Obs -> Feature) seq
+    let isValid = function 
+        | Valid(_) -> true 
+        | Invalid(_) -> false
+
+    let extractValid xs =
+        xs
+        |> Seq.filter isValid
+        |> Seq.map (function 
+            | Valid(x) -> x 
+            | Invalid(_) -> failwith "Impossible"
+            )
+
+    type Feature<'Obs> = 
+        | Continuous of ('Obs -> Value<'Obs,float>)
+        | Categorical of (int * ('Obs -> Value<'Obs,int>))
     
     type BinaryLabel<'Lbl> (lbl:'Lbl->bool) =
         member this.Label (x:'Lbl) = lbl x
@@ -32,25 +46,60 @@ module Core =
     type ContinuousLabel<'Lbl> (lbl:'Lbl->float) =
         member this.Label (x:'Lbl) = lbl x
 
-    let caseMatch matches value =
+    let categorical matches feat =
         let cases = matches |> Seq.length
-        let index = 
-            matches
-            |> Seq.findIndex (fun m -> m = value)
-        (index,cases)
+        let activeCase = 
+            fun obs ->
+                try
+                    let value = feat obs
+                    let index = 
+                        matches
+                        |> Seq.tryFindIndex (fun m -> m = value)
+                    match index with
+                    | Some(index) -> Valid(index)
+                    | None -> 
+                        let msg = sprintf "Unexpected value: %A" value
+                        Invalid(obs,msg)
+                with
+                | ex -> Invalid(obs,ex.Message)
 
-    let orderMatch bins value =
-        // this assumes bins are pre-sorted
+        Categorical(cases, activeCase)
+
+    let inline continuous feat =
+        let extractor = 
+            fun obs ->
+                try
+                    let v = feat obs |> float
+                    if System.Double.IsNaN v
+                    then Invalid(obs,"NaN")
+                    elif System.Double.IsInfinity v
+                    then Invalid(obs,"Infinity")
+                    else Valid v
+                with
+                | ex -> Invalid(obs,ex.Message)
+        Continuous(extractor)
+
+    type Features<'Obs> = Feature<'Obs> list
+
+    let binned bins value =
+        let bins = bins |> Seq.sort
         let values = 
             bins 
             |> Seq.length
-        let index =
-            bins
-            |> Seq.tryFindIndex (fun b -> value <= b)
-            |> function 
-                | Some(i) -> i
-                | None -> values
-        (index,values+1)
+        let activeCase = 
+            fun obs ->
+                try
+                    let value = value obs
+                    let index = 
+                        bins
+                        |> Seq.tryFindIndex (fun b -> value <= b)
+                    match index with
+                    | Some(index) -> Valid(index)
+                    | None -> Valid(values)
+                with
+                | ex -> Invalid(obs,ex.Message)
+
+        Categorical(values + 1, activeCase)
 
     let isNumber (x:float) =
         System.Double.IsInfinity x
@@ -62,27 +111,22 @@ module Core =
         then Some x
         else None 
 
-    let inline continuous x = float x |> Continuous
-
-    let categorical matches = caseMatch matches >> Categorical
-
-    // TODO check what happens for NaN, infinity etc...
-    // in case 'a is a float
-    let binned values = orderMatch values >> Categorical
-
-    let encode<'Obs> (feature:'Obs -> Feature) (obs:'Obs) =
+    let encode<'Obs> (feature:Feature<'Obs>) (obs:'Obs) =
         try
-            let value = feature obs
-            match value with
-            | Continuous(v) -> 
-                properNumber v
-                |> Option.map (Seq.singleton)
-            | Categorical(index,cases) ->
-                Seq.init 
-                    (cases - 1)
-                        (fun i -> 
-                            if i = index then 1. else 0.)
-                |> Some
+            match feature with
+            | Continuous(value) -> 
+                match (value obs) with
+                | Invalid(_) -> None
+                | Valid(x) -> Seq.singleton x |> Some
+            | Categorical(cases,index) ->
+                match (index obs) with
+                | Invalid(_) -> None
+                | Valid(ind) ->
+                    Seq.init 
+                        (cases - 1)
+                            (fun i -> 
+                                if i = ind then 1. else 0.)
+                    |> Some
         with
         | _ -> None 
 
@@ -97,6 +141,75 @@ module Core =
     let isComplete<'T> (xs:Option<'T> seq) = 
         xs |> Seq.forall (available)
 
+[<RequireQualifiedAccess>]
+module Features = 
+
+    open Core
+
+    let summary sample feature  = 
+        
+        let count = sample |> Seq.length
+
+        match feature with
+        | Continuous(value) ->
+
+            let valid = 
+                sample
+                |> Seq.map value
+                |> extractValid
+
+            let validCount = valid |> Seq.length
+            printfn "Values: %i (Valid: %i, Invalid: %i)" count validCount (count - validCount)
+
+            if validCount > 0
+            then
+                let minimum = valid |> Seq.min
+                let maximum = valid |> Seq.max
+                let average = valid |> Seq.average
+
+                printfn "Minimum: %.4f" minimum
+                printfn "Maximum: %.4f" maximum
+                printfn "Average: %.4f" average
+
+        | Categorical(cases,case) ->
+
+            let valid = 
+                sample
+                |> Seq.map case
+                |> extractValid
+
+            let validCount = valid |> Seq.length
+            printfn "Values: %i (Valid: %i, Invalid: %i)" count validCount (count - validCount)
+
+            if validCount > 0
+            then
+                let values =
+                    valid
+                    |> Seq.countBy id
+                    |> dict
+
+                for c in 0 .. cases - 1 do
+                    match (values.TryGetValue c) with
+                    | true, count -> printfn "Case %i: %i" (c+1) count
+                    | false, _    -> printfn "Case %i: %i" (c+1) 0
+
+    let diagnosis sample feature = 
+
+        let count = sample |> Seq.length
+        let errors xs f =
+            xs
+            |> Seq.map f
+            |> Seq.filter (function 
+                | Invalid(_) -> true 
+                | Valid(_) -> false)
+            |> Seq.map (function
+                | Invalid(obs,msg) -> obs, msg
+                | Valid(_) -> failwith "Impossible")
+
+        match feature with
+        | Continuous(value) -> errors sample value
+        | Categorical(cases,case) -> errors sample case
+              
 module Measures =
 
     let included (xs:('Lbl*Option<'Lbl>)seq) =
