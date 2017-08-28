@@ -17,9 +17,9 @@ module Sampling =
 
 module Core = 
 
-    /// A Feature can be either:
-    /// Continuous: it can take any float value,
-    /// Categorical: it is one of a set of possible cases.
+    /// A Value extracted from an Observation can either
+    /// be Valid, or Invalid, in what case we provide both
+    /// the faulty observation, and an error message.
     type Value<'Obs,'T> =
         | Valid of 'T
         | Invalid of 'Obs * string
@@ -36,6 +36,9 @@ module Core =
             | Invalid(_) -> failwith "Impossible"
             )
 
+    /// A Feature can be either:
+    /// Continuous: it can take any float value,
+    /// Categorical: it is one of a set of possible cases.
     type Feature<'Obs> = 
         | Continuous of ('Obs -> Value<'Obs,float>)
         | Categorical of (int * ('Obs -> Value<'Obs,int>))
@@ -46,6 +49,10 @@ module Core =
     type ContinuousLabel<'Lbl> (lbl:'Lbl->float) =
         member this.Label (x:'Lbl) = lbl x
 
+    /// Given a feature, extracting a value from an observation,
+    /// and a list of expected matching values, return both
+    /// the number of possible cases, and the 0-based index
+    /// indicating which case is active.
     let categorical matches feat =
         let cases = matches |> Seq.length
         let activeCase = 
